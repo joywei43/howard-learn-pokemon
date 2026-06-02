@@ -827,7 +827,7 @@ function checkAnswer(userAnswer, clickedButton = null) {
     clickedButton?.classList.add("correct-glow");
 
     playCorrectAnimation();
-    speak("答對了！太棒了！");
+    speak("你真棒！");
 
     setTimeout(() => {
       renderFeedback(true, userAnswer);
