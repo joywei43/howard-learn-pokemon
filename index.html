@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>屬性小學堂｜18種屬性相剋練習</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
 
+    <header class="top-header">
+      <div class="type-ribbon" id="topTypeRibbon"></div>
+      <h1>屬性小學堂</h1>
+      <p>18 種屬性相剋練習遊戲</p>
+
+      <div class="voice-panel">
+        <button id="voiceToggle" class="small-btn">🔊 語音：開</button>
+        <select id="voiceSpeed" class="select">
+          <option value="0.75">慢速</option>
+          <option value="0.9" selected>普通</option>
+          <option value="1.1">快速</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Home Screen -->
+    <section id="homeScreen" class="screen active">
+      <div class="hero-card">
+        <div>
+          <h2>選擇練習難度</h2>
+          <p>看攻擊屬性與防守屬性，選出正確效果倍率。</p>
+        </div>
+        <div class="hero-mascot">✨</div>
+      </div>
+
+      <div class="level-grid">
+        <button class="level-card beginner" data-level="beginner">
+          <span class="level-icon">😊</span>
+          <strong>新手訓練</strong>
+          <small>單屬性，不出現沒有效果 0x</small>
+        </button>
+
+        <button class="level-card standard" data-level="standard">
+          <span class="level-icon">🏆</span>
+          <strong>屬性挑戰</strong>
+          <small>單屬性，完整 18 屬性相剋</small>
+        </button>
+
+        <button class="level-card master" data-level="master">
+          <span class="level-icon">👑</span>
+          <strong>大師試煉</strong>
+          <small>雙屬性，倍率相乘</small>
+        </button>
+      </div>
+
+      <button id="openChartBtn" class="secondary-btn">📖 查看屬性相剋表</button>
+
+      <p class="note">
+        本遊戲為學習用途，使用原創簡化符號與介面，不使用官方角色、Logo 或圖片素材。
+      </p>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="gameScreen" class="screen">
+      <div class="game-topbar">
+        <button id="backHomeBtn" class="circle-btn">←</button>
+        <div class="progress-text">
+          第 <span id="currentQuestion">1</span> / <span id="totalQuestions">10</span> 題
+        </div>
+        <div class="score-box">⭐ <span id="scoreText">0</span></div>
+        <div class="combo-box">🔥 連擊 <span id="comboText">0</span></div>
+      </div>
+
+      <div class="question-card">
+        <div class="battle-row">
+          <div class="type-display">
+            <div class="label">攻擊方</div>
+            <div id="attackBadge" class="big-type-badge"></div>
+            <div id="attackName" class="type-name"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="type-display">
+            <div class="label">防守方</div>
+            <div id="defenseBadges" class="defense-badges"></div>
+            <div id="defenseName" class="type-name"></div>
+          </div>
+        </div>
+
+        <h2 id="questionText">效果如何？</h2>
+
+        <div id="answerOptions" class="answer-grid"></div>
+      </div>
+    </section>
+
+    <!-- Feedback Screen -->
+    <section id="feedbackScreen" class="screen">
+      <div class="feedback-card">
+        <h2 id="feedbackTitle">答對了！</h2>
+        <div id="feedbackIcon" class="feedback-icon">🎉</div>
+        <p id="feedbackMain"></p>
+        <div id="feedbackExplain" class="explain-box"></div>
+
+        <div class="feedback-actions">
+          <button id="chartFromFeedbackBtn" class="secondary-btn">📖 查看相剋表</button>
+          <button id="nextQuestionBtn" class="primary-btn">下一題 ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result Screen -->
+    <section id="resultScreen" class="screen">
+      <div class="result-card">
+        <div class="result-medal">🏅</div>
+        <h2>挑戰完成！</h2>
+
+        <div class="result-stats">
+          <div>
+            <strong id="correctText">0 / 10</strong>
+            <span>答對題目</span>
+          </div>
+          <div>
+            <strong id="bestComboText">0</strong>
+            <span>最高連擊</span>
+          </div>
+          <div>
+            <strong id="finalScoreText">0</strong>
+            <span>總分</span>
+          </div>
+        </div>
+
+        <div class="wrong-review">
+          <h3>錯題複習</h3>
+          <div id="wrongList"></div>
+        </div>
+
+        <div class="result-actions">
+          <button id="playAgainBtn" class="primary-btn">再玩一次</button>
+          <button id="resultHomeBtn" class="secondary-btn">回首頁</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Type Chart Modal -->
+    <section id="chartModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>屬性相剋表</h2>
+          <button id="closeChartBtn" class="circle-btn">×</button>
+        </div>
+
+        <p class="chart-help">選擇攻擊屬性，查看它攻擊不同防守屬性的效果。</p>
+
+        <div id="chartTypeButtons" class="chart-type-buttons"></div>
+
+        <div id="chartDetail" class="chart-detail"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
