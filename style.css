@@ -574,3 +574,88 @@ select {
     letter-spacing: 0.04em;
   }
 }
+.trainer-section {
+  margin-bottom: 18px;
+}
+
+.trainer-track-wrap {
+  position: relative;
+  height: 90px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #e0f2fe, #f0fdf4);
+  border: 2px solid #c7d2fe;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.trainer-track {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-items: center;
+  padding: 0 22px;
+  gap: 8px;
+}
+
+.track-step {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.track-step.done {
+  background: linear-gradient(90deg, #22c55e, #84cc16);
+}
+
+.trainer-icon {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  font-size: 2rem;
+  transition: left 0.35s ease, transform 0.2s ease;
+}
+
+.trainer-mood {
+  position: absolute;
+  top: 8px;
+  left: 20px;
+  font-size: 1.4rem;
+  transition: left 0.35s ease;
+}
+
+.finish-flag {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.8rem;
+}
+
+.trainer-hint {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 800;
+  color: #475569;
+}
+
+.retry-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  text-align: center;
+}
+
+.retry-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.hidden {
+  display: none;
+}
