@@ -1,5 +1,9 @@
 const TOTAL_QUESTIONS = 10;
 
+/**
+ * 屬性資料
+ * 使用原創簡化符號，不使用官方圖示。
+ */
 const types = {
   normal: { name: "一般", icon: "○", color: "#9CA3AF" },
   fire: { name: "火", icon: "🔥", color: "#F97316" },
@@ -23,26 +27,288 @@ const types = {
 
 const typeIds = Object.keys(types);
 
+/**
+ * 官方邏輯：
+ * 攻擊方 → 防守方
+ * 2 = 效果很好
+ * 0.5 = 效果不好
+ * 0 = 沒有效果
+ * 未列出 = 普通 1x
+ */
 const chart = {
-  normal: { rock: 0.5, ghost: 0, steel: 0.5 },
-  fire: { fire: 0.5, water: 0.5, grass: 2, ice: 2, bug: 2, rock: 0.5, dragon: 0.5, steel: 2 },
-  water: { fire: 2, water: 0.5, grass: 0.5, ground: 2, rock: 2, dragon: 0.5 },
-  grass: { fire: 0.5, water: 2, grass: 0.5, poison: 0.5, ground: 2, flying: 0.5, bug: 0.5, rock: 2, dragon: 0.5, steel: 0.5 },
-  electric: { water: 2, electric: 0.5, grass: 0.5, ground: 0, flying: 2, dragon: 0.5 },
-  ice: { fire: 0.5, water: 0.5, grass: 2, ice: 0.5, ground: 2, flying: 2, dragon: 2, steel: 0.5 },
-  fighting: { normal: 2, ice: 2, poison: 0.5, flying: 0.5, psychic: 0.5, bug: 0.5, rock: 2, ghost: 0, dark: 2, steel: 2, fairy: 0.5 },
-  poison: { grass: 2, poison: 0.5, ground: 0.5, rock: 0.5, ghost: 0.5, steel: 0, fairy: 2 },
-  ground: { fire: 2, electric: 2, grass: 0.5, poison: 2, flying: 0, bug: 0.5, rock: 2, steel: 2 },
-  flying: { electric: 0.5, grass: 2, fighting: 2, bug: 2, rock: 0.5, steel: 0.5 },
-  psychic: { fighting: 2, poison: 2, psychic: 0.5, dark: 0, steel: 0.5 },
-  bug: { fire: 0.5, grass: 2, fighting: 0.5, poison: 0.5, flying: 0.5, psychic: 2, ghost: 0.5, dark: 2, steel: 0.5, fairy: 0.5 },
-  rock: { fire: 2, ice: 2, fighting: 0.5, ground: 0.5, flying: 2, bug: 2, steel: 0.5 },
-  ghost: { normal: 0, psychic: 2, ghost: 2, dark: 0.5 },
-  dragon: { dragon: 2, steel: 0.5, fairy: 0 },
-  dark: { fighting: 0.5, psychic: 2, ghost: 2, dark: 0.5, fairy: 0.5 },
-  steel: { fire: 0.5, water: 0.5, electric: 0.5, ice: 2, rock: 2, steel: 0.5, fairy: 2 },
-  fairy: { fire: 0.5, fighting: 2, poison: 0.5, dragon: 2, dark: 2, steel: 0.5 }
+  normal: {
+    rock: 0.5,
+    ghost: 0,
+    steel: 0.5
+  },
+
+  fire: {
+    fire: 0.5,
+    water: 0.5,
+    grass: 2,
+    ice: 2,
+    bug: 2,
+    rock: 0.5,
+    dragon: 0.5,
+    steel: 2
+  },
+
+  water: {
+    fire: 2,
+    water: 0.5,
+    grass: 0.5,
+    ground: 2,
+    rock: 2,
+    dragon: 0.5
+  },
+
+  electric: {
+    water: 2,
+    electric: 0.5,
+    grass: 0.5,
+    ground: 0,
+    flying: 2,
+    dragon: 0.5
+  },
+
+  grass: {
+    fire: 0.5,
+    water: 2,
+    grass: 0.5,
+    poison: 0.5,
+    ground: 2,
+    flying: 0.5,
+    bug: 0.5,
+    rock: 2,
+    dragon: 0.5,
+    steel: 0.5
+  },
+
+  ice: {
+    fire: 0.5,
+    water: 0.5,
+    grass: 2,
+    ice: 0.5,
+    ground: 2,
+    flying: 2,
+    dragon: 2,
+    steel: 0.5
+  },
+
+  fighting: {
+    normal: 2,
+    ice: 2,
+    poison: 0.5,
+    flying: 0.5,
+    psychic: 0.5,
+    bug: 0.5,
+    rock: 2,
+    ghost: 0,
+    dark: 2,
+    steel: 2,
+    fairy: 0.5
+  },
+
+  poison: {
+    grass: 2,
+    poison: 0.5,
+    ground: 0.5,
+    rock: 0.5,
+    ghost: 0.5,
+    steel: 0,
+    fairy: 2
+  },
+
+  ground: {
+    fire: 2,
+    electric: 2,
+    grass: 0.5,
+    poison: 2,
+    flying: 0,
+    bug: 0.5,
+    rock: 2,
+    steel: 2
+  },
+
+  flying: {
+    electric: 0.5,
+    grass: 2,
+    fighting: 2,
+    bug: 2,
+    rock: 0.5,
+    steel: 0.5
+  },
+
+  psychic: {
+    fighting: 2,
+    poison: 2,
+    psychic: 0.5,
+    dark: 0,
+    steel: 0.5
+  },
+
+  bug: {
+    fire: 0.5,
+    grass: 2,
+    fighting: 0.5,
+    poison: 0.5,
+    flying: 0.5,
+    psychic: 2,
+    ghost: 0.5,
+    dark: 2,
+    steel: 0.5,
+    fairy: 0.5
+  },
+
+  rock: {
+    fire: 2,
+    ice: 2,
+    fighting: 0.5,
+    ground: 0.5,
+    flying: 2,
+    bug: 2,
+    steel: 0.5
+  },
+
+  ghost: {
+    normal: 0,
+    psychic: 2,
+    ghost: 2,
+    dark: 0.5
+  },
+
+  dragon: {
+    dragon: 2,
+    steel: 0.5,
+    fairy: 0
+  },
+
+  dark: {
+    fighting: 0.5,
+    psychic: 2,
+    ghost: 2,
+    dark: 0.5,
+    fairy: 0.5
+  },
+
+  steel: {
+    fire: 0.5,
+    water: 0.5,
+    electric: 0.5,
+    ice: 2,
+    rock: 2,
+    steel: 0.5,
+    fairy: 2
+  },
+
+  fairy: {
+    fire: 0.5,
+    fighting: 2,
+    poison: 0.5,
+    dragon: 2,
+    dark: 2,
+    steel: 0.5
+  }
 };
+
+/**
+ * 大師試煉使用比較像實際遊戲中會出現的雙屬性組合。
+ * 不隨機亂湊，讓練習更貼近真實雙屬性邏輯。
+ */
+const dualTypePool = [
+  ["normal", "flying"],
+  ["normal", "fairy"],
+
+  ["fire", "flying"],
+  ["fire", "dragon"],
+  ["fire", "fighting"],
+  ["fire", "rock"],
+  ["fire", "steel"],
+
+  ["water", "ground"],
+  ["water", "flying"],
+  ["water", "dragon"],
+  ["water", "fairy"],
+  ["water", "rock"],
+  ["water", "ice"],
+  ["water", "poison"],
+
+  ["grass", "poison"],
+  ["grass", "flying"],
+  ["grass", "dragon"],
+  ["grass", "ground"],
+  ["grass", "fairy"],
+  ["grass", "steel"],
+
+  ["electric", "flying"],
+  ["electric", "steel"],
+  ["electric", "ghost"],
+  ["electric", "fairy"],
+
+  ["ice", "psychic"],
+  ["ice", "ground"],
+  ["ice", "flying"],
+  ["ice", "water"],
+
+  ["fighting", "steel"],
+  ["fighting", "psychic"],
+  ["fighting", "dark"],
+  ["fighting", "flying"],
+
+  ["poison", "dark"],
+  ["poison", "flying"],
+  ["poison", "ground"],
+  ["poison", "ghost"],
+  ["poison", "fairy"],
+
+  ["ground", "flying"],
+  ["ground", "dragon"],
+  ["ground", "rock"],
+  ["ground", "steel"],
+
+  ["flying", "dragon"],
+  ["flying", "steel"],
+  ["flying", "dark"],
+
+  ["psychic", "fairy"],
+  ["psychic", "fighting"],
+  ["psychic", "steel"],
+  ["psychic", "flying"],
+
+  ["bug", "flying"],
+  ["bug", "steel"],
+  ["bug", "poison"],
+  ["bug", "rock"],
+  ["bug", "grass"],
+
+  ["rock", "ground"],
+  ["rock", "water"],
+  ["rock", "flying"],
+  ["rock", "dark"],
+
+  ["ghost", "poison"],
+  ["ghost", "dark"],
+  ["ghost", "fire"],
+  ["ghost", "grass"],
+
+  ["dragon", "flying"],
+  ["dragon", "ground"],
+  ["dragon", "water"],
+  ["dragon", "fire"],
+
+  ["dark", "flying"],
+  ["dark", "ghost"],
+  ["dark", "steel"],
+  ["dark", "dragon"],
+
+  ["steel", "fairy"],
+  ["steel", "psychic"],
+  ["steel", "flying"],
+  ["steel", "dragon"],
+
+  ["fairy", "flying"],
+  ["fairy", "psychic"]
+];
 
 const effectLabels = {
   4: "超有效",
@@ -62,6 +328,15 @@ const effectColors = {
   0: "#4C1D95"
 };
 
+const effectVoice = {
+  4: "四倍",
+  2: "兩倍",
+  1: "一倍",
+  0.5: "零點五倍",
+  0.25: "零點二五倍",
+  0: "零倍"
+};
+
 let state = {
   level: "beginner",
   questionIndex: 0,
@@ -72,16 +347,222 @@ let state = {
   currentQuestion: null,
   wrongAnswers: [],
   voiceEnabled: true,
-  voiceRate: 0.9
+  voiceRate: 0.9,
+
+  attemptsOnCurrentQuestion: 0,
+  firstWrongAnswer: null,
+  lastLevel: "beginner"
 };
 
 const $ = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", () => {
+  ensureV2Elements();
+  injectV2Styles();
   renderTopRibbon();
   bindEvents();
   renderChartButtons();
 });
+
+/**
+ * 如果你還沒改 HTML，這段會自動補上：
+ * 1. 訓練家前進路線
+ * 2. 再試一次區塊
+ */
+function ensureV2Elements() {
+  const gameScreen = $("gameScreen");
+  const gameTopbar = document.querySelector(".game-topbar");
+  const questionCard = document.querySelector(".question-card");
+  const answerOptions = $("answerOptions");
+
+  if (gameScreen && gameTopbar && !$("trainerTrack")) {
+    const trainerSection = document.createElement("div");
+    trainerSection.className = "trainer-section";
+    trainerSection.innerHTML = `
+      <div class="trainer-track-wrap">
+        <div id="trainerTrack" class="trainer-track"></div>
+        <div id="trainerIcon" class="trainer-icon">🧑‍🎒</div>
+        <div id="trainerMood" class="trainer-mood">🙂</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div id="trainerHint" class="trainer-hint">答對就往前走！</div>
+    `;
+
+    gameTopbar.insertAdjacentElement("afterend", trainerSection);
+  }
+
+  if (questionCard && answerOptions && !$("retryPanel")) {
+    const retryPanel = document.createElement("div");
+    retryPanel.id = "retryPanel";
+    retryPanel.className = "retry-panel hidden";
+    retryPanel.innerHTML = `
+      <p id="retryText">差一點，再試一次！</p>
+      <div class="retry-actions">
+        <button id="retryBtn" class="secondary-btn">再試一次</button>
+        <button id="showAnswerBtn" class="primary-btn">看答案</button>
+      </div>
+    `;
+
+    answerOptions.insertAdjacentElement("afterend", retryPanel);
+  }
+}
+
+/**
+ * 如果你還沒把 V2 CSS 貼進 style.css，
+ * 這段會先讓新功能有基本樣式。
+ */
+function injectV2Styles() {
+  if ($("v2DynamicStyle")) return;
+
+  const style = document.createElement("style");
+  style.id = "v2DynamicStyle";
+  style.textContent = `
+    .trainer-section {
+      margin-bottom: 18px;
+    }
+
+    .trainer-track-wrap {
+      position: relative;
+      height: 92px;
+      border-radius: 24px;
+      background: linear-gradient(90deg, #e0f2fe, #f0fdf4);
+      border: 2px solid #c7d2fe;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .trainer-track {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      align-items: center;
+      padding: 0 24px;
+      gap: 8px;
+    }
+
+    .track-step {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.28);
+    }
+
+    .track-step.done {
+      background: linear-gradient(90deg, #22c55e, #84cc16);
+    }
+
+    .trainer-icon {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      font-size: 2.15rem;
+      transition: left 0.35s ease, transform 0.2s ease;
+      z-index: 2;
+    }
+
+    .trainer-icon.happy-jump {
+      transform: translateY(-8px) scale(1.1);
+    }
+
+    .trainer-icon.sad-shake {
+      animation: sadShake 0.35s ease;
+    }
+
+    @keyframes sadShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .trainer-mood {
+      position: absolute;
+      top: 8px;
+      left: 20px;
+      font-size: 1.45rem;
+      transition: left 0.35s ease;
+      z-index: 2;
+    }
+
+    .finish-flag {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.9rem;
+      z-index: 2;
+    }
+
+    .trainer-hint {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: 900;
+      color: #475569;
+    }
+
+    .retry-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      text-align: center;
+    }
+
+    .retry-panel p {
+      margin: 0;
+      font-weight: 900;
+      color: #9a3412;
+    }
+
+    .retry-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .answer-btn.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+      filter: grayscale(0.25);
+    }
+
+    .answer-btn.wrong-flash {
+      animation: wrongFlash 0.32s ease;
+    }
+
+    @keyframes wrongFlash {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .question-card.retrying {
+      border-color: #fed7aa;
+      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.18);
+    }
+
+    .explain-line {
+      margin: 6px 0;
+    }
+
+    .formula-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      font-weight: 900;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
 
 function bindEvents() {
   document.querySelectorAll(".level-card").forEach((btn) => {
@@ -90,28 +571,47 @@ function bindEvents() {
     });
   });
 
-  $("backHomeBtn").addEventListener("click", goHome);
-  $("resultHomeBtn").addEventListener("click", goHome);
-  $("playAgainBtn").addEventListener("click", () => startGame(state.level));
-  $("nextQuestionBtn").addEventListener("click", nextQuestion);
+  $("backHomeBtn")?.addEventListener("click", goHome);
+  $("resultHomeBtn")?.addEventListener("click", goHome);
+  $("playAgainBtn")?.addEventListener("click", () => startGame(state.lastLevel));
+  $("nextQuestionBtn")?.addEventListener("click", nextQuestion);
 
-  $("openChartBtn").addEventListener("click", () => openChart());
-  $("chartFromFeedbackBtn").addEventListener("click", () => openChart(state.currentQuestion.attack));
-  $("closeChartBtn").addEventListener("click", closeChart);
+  $("openChartBtn")?.addEventListener("click", () => openChart());
+  $("chartFromFeedbackBtn")?.addEventListener("click", () => {
+    openChart(state.currentQuestion?.attack || "fire");
+  });
+  $("closeChartBtn")?.addEventListener("click", closeChart);
 
-  $("voiceToggle").addEventListener("click", () => {
+  $("voiceToggle")?.addEventListener("click", () => {
     state.voiceEnabled = !state.voiceEnabled;
     $("voiceToggle").textContent = state.voiceEnabled ? "🔊 語音：開" : "🔇 語音：關";
-    if (!state.voiceEnabled) window.speechSynthesis.cancel();
+
+    if (!state.voiceEnabled && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
   });
 
-  $("voiceSpeed").addEventListener("change", (e) => {
+  $("voiceSpeed")?.addEventListener("change", (e) => {
     state.voiceRate = Number(e.target.value);
+  });
+
+  $("retryBtn")?.addEventListener("click", () => {
+    hideRetryPanel();
+    setQuestionRetrying(false);
+    enableAnswerButtons();
+    renderTrainerTrack("normal");
+    speak("再試一次看看。");
+  });
+
+  $("showAnswerBtn")?.addEventListener("click", () => {
+    revealAnswerAfterWrong();
   });
 }
 
 function renderTopRibbon() {
   const ribbon = $("topTypeRibbon");
+  if (!ribbon) return;
+
   ribbon.innerHTML = typeIds
     .map((id) => {
       const t = types[id];
@@ -124,37 +624,55 @@ function showScreen(screenId) {
   document.querySelectorAll(".screen").forEach((screen) => {
     screen.classList.remove("active");
   });
-  $(screenId).classList.add("active");
+
+  $(screenId)?.classList.add("active");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function startGame(level) {
-  window.speechSynthesis.cancel();
+  cancelSpeech();
 
   state.level = level;
+  state.lastLevel = level;
   state.questionIndex = 0;
   state.score = 0;
   state.combo = 0;
   state.bestCombo = 0;
   state.correct = 0;
   state.wrongAnswers = [];
+  state.attemptsOnCurrentQuestion = 0;
+  state.firstWrongAnswer = null;
 
-  $("totalQuestions").textContent = TOTAL_QUESTIONS;
+  if ($("totalQuestions")) $("totalQuestions").textContent = TOTAL_QUESTIONS;
+
+  hideRetryPanel();
+  setQuestionRetrying(false);
+  renderTrainerTrack("normal");
 
   showScreen("gameScreen");
   generateQuestion();
 }
 
 function goHome() {
-  window.speechSynthesis.cancel();
+  cancelSpeech();
+  hideRetryPanel();
+  setQuestionRetrying(false);
   showScreen("homeScreen");
 }
 
 function generateQuestion() {
   state.questionIndex += 1;
-  $("currentQuestion").textContent = state.questionIndex;
-  $("scoreText").textContent = state.score;
-  $("comboText").textContent = state.combo;
+  state.attemptsOnCurrentQuestion = 0;
+  state.firstWrongAnswer = null;
+
+  hideRetryPanel();
+  setQuestionRetrying(false);
+  enableAnswerButtons();
+  renderTrainerTrack("normal");
+
+  if ($("currentQuestion")) $("currentQuestion").textContent = state.questionIndex;
+  if ($("scoreText")) $("scoreText").textContent = state.score;
+  if ($("comboText")) $("comboText").textContent = state.combo;
 
   let question;
 
@@ -170,7 +688,9 @@ function generateQuestion() {
 }
 
 function generateSingleTypeQuestion(level) {
-  let attack, defense, effect;
+  let attack;
+  let defense;
+  let effect;
 
   do {
     attack = randomItem(typeIds);
@@ -181,18 +701,19 @@ function generateSingleTypeQuestion(level) {
   return {
     attack,
     defenses: [defense],
-    effect
+    effect,
+    parts: [
+      {
+        defense,
+        effect
+      }
+    ]
   };
 }
 
 function generateMasterQuestion() {
   const attack = randomItem(typeIds);
-  let def1 = randomItem(typeIds);
-  let def2 = randomItem(typeIds);
-
-  while (def2 === def1) {
-    def2 = randomItem(typeIds);
-  }
+  const [def1, def2] = randomItem(dualTypePool);
 
   const e1 = getEffectiveness(attack, def1);
   const e2 = getEffectiveness(attack, def2);
@@ -200,12 +721,22 @@ function generateMasterQuestion() {
   return {
     attack,
     defenses: [def1, def2],
-    effect: e1 * e2,
+    effect: normalizeEffect(e1 * e2),
     parts: [
       { defense: def1, effect: e1 },
       { defense: def2, effect: e2 }
     ]
   };
+}
+
+function normalizeEffect(value) {
+  if (value === 0) return 0;
+  if (value === 0.25) return 0.25;
+  if (value === 0.5) return 0.5;
+  if (value === 1) return 1;
+  if (value === 2) return 2;
+  if (value === 4) return 4;
+  return value;
 }
 
 function getEffectiveness(attack, defense) {
@@ -216,37 +747,53 @@ function renderQuestion(question) {
   const attack = types[question.attack];
   const defenses = question.defenses.map((id) => types[id]);
 
-  $("attackBadge").style.background = attack.color;
-  $("attackBadge").textContent = attack.icon;
-  $("attackName").textContent = attack.name;
+  if ($("attackBadge")) {
+    $("attackBadge").style.background = attack.color;
+    $("attackBadge").textContent = attack.icon;
+  }
 
-  $("defenseBadges").innerHTML = defenses
-    .map((d) => {
-      return `<div class="defense-badge" style="background:${d.color}">${d.icon}</div>`;
-    })
-    .join("");
+  if ($("attackName")) {
+    $("attackName").textContent = attack.name;
+  }
 
-  $("defenseName").textContent = defenses.map((d) => d.name).join(" + ");
+  if ($("defenseBadges")) {
+    $("defenseBadges").innerHTML = defenses
+      .map((d) => {
+        return `<div class="defense-badge" style="background:${d.color}">${d.icon}</div>`;
+      })
+      .join("");
+  }
 
-  $("questionText").textContent = `${attack.name} 攻擊 ${defenses.map((d) => d.name).join(" + ")}，效果如何？`;
+  if ($("defenseName")) {
+    $("defenseName").textContent = defenses.map((d) => d.name).join(" + ");
+  }
+
+  const defenseText = defenses.map((d) => d.name).join(" + ");
+
+  if ($("questionText")) {
+    $("questionText").textContent = `${attack.name} 攻擊 ${defenseText}，效果如何？`;
+  }
 
   const options = getOptionsByLevel();
-  $("answerOptions").innerHTML = options
-    .map((value) => {
-      return `
-        <button class="answer-btn" style="background:${effectColors[value]}" data-effect="${value}">
-          ${effectLabels[value]}<br>
-          ${value}x
-        </button>
-      `;
-    })
-    .join("");
 
-  document.querySelectorAll(".answer-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      checkAnswer(Number(btn.dataset.effect));
+  if ($("answerOptions")) {
+    $("answerOptions").innerHTML = options
+      .map((value) => {
+        return `
+          <button class="answer-btn" style="background:${effectColors[value]}" data-effect="${value}">
+            ${effectLabels[value]}<br>
+            ${value}x
+          </button>
+        `;
+      })
+      .join("");
+
+    document.querySelectorAll(".answer-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        checkAnswer(Number(btn.dataset.effect), btn);
+      });
     });
-  });
+  }
 }
 
 function getOptionsByLevel() {
@@ -255,73 +802,198 @@ function getOptionsByLevel() {
   return [4, 2, 1, 0.5, 0.25, 0];
 }
 
-function checkAnswer(userAnswer) {
+/**
+ * 答題邏輯 V2：
+ * 第一次答錯：不直接跳結果，讓小孩再試一次。
+ * 第二次答錯或按看答案：才進入解析。
+ * 答對：訓練家往前走。
+ */
+function checkAnswer(userAnswer, clickedButton = null) {
   const q = state.currentQuestion;
+  if (!q) return;
+
   const isCorrect = userAnswer === q.effect;
 
   if (isCorrect) {
+    const firstTryCorrect = state.attemptsOnCurrentQuestion === 0;
+
     state.correct += 1;
-    state.combo += 1;
+
+    if (firstTryCorrect) {
+      state.combo += 1;
+    } else {
+      state.combo = 0;
+    }
+
     state.bestCombo = Math.max(state.bestCombo, state.combo);
 
     let baseScore = 10;
     if (state.level === "standard") baseScore = 15;
     if (state.level === "master") baseScore = 20;
 
-    state.score += baseScore + Math.min(state.combo * 2, 20);
-  } else {
-    state.combo = 0;
-    state.wrongAnswers.push({
-      question: q,
-      userAnswer,
-      correctAnswer: q.effect
-    });
+    if (firstTryCorrect) {
+      state.score += baseScore + Math.min(state.combo * 2, 20);
+    } else {
+      state.score += Math.floor(baseScore * 0.6);
+    }
+
+    if ($("scoreText")) $("scoreText").textContent = state.score;
+    if ($("comboText")) $("comboText").textContent = state.combo;
+
+    hideRetryPanel();
+    setQuestionRetrying(false);
+    disableAnswerButtons();
+    renderTrainerTrack("happy");
+
+    setTimeout(() => {
+      renderFeedback(true, userAnswer);
+      showScreen("feedbackScreen");
+    }, 450);
+
+    return;
   }
 
-  renderFeedback(isCorrect, userAnswer);
-  showScreen("feedbackScreen");
+  /**
+   * 第一次答錯：
+   * 訓練家懊惱，出現再試一次。
+   */
+  if (state.attemptsOnCurrentQuestion === 0) {
+    state.attemptsOnCurrentQuestion = 1;
+    state.firstWrongAnswer = userAnswer;
+    state.combo = 0;
+
+    if ($("comboText")) $("comboText").textContent = state.combo;
+
+    clickedButton?.classList.add("wrong-flash");
+    clickedButton?.classList.add("disabled");
+
+    const attackName = types[q.attack].name;
+    const defenseNames = q.defenses.map((id) => types[id].name).join(" + ");
+
+    renderTrainerTrack("sad");
+    setQuestionRetrying(true);
+    showRetryPanel(`差一點！${attackName} 攻擊 ${defenseNames} 不是「${effectLabels[userAnswer]}」，再試一次看看。`);
+    speak("差一點，再試一次看看。");
+    return;
+  }
+
+  /**
+   * 第二次還錯：
+   * 直接公布答案。
+   */
+  revealAnswerAfterWrong(userAnswer);
+}
+
+function revealAnswerAfterWrong(secondWrongAnswer = null) {
+  const q = state.currentQuestion;
+  if (!q) return;
+
+  state.combo = 0;
+  if ($("comboText")) $("comboText").textContent = state.combo;
+
+  state.wrongAnswers.push({
+    question: q,
+    userAnswer: state.firstWrongAnswer ?? secondWrongAnswer ?? q.effect,
+    secondWrongAnswer,
+    correctAnswer: q.effect
+  });
+
+  hideRetryPanel();
+  setQuestionRetrying(false);
+  disableAnswerButtons();
+  renderTrainerTrack("sad");
+
+  setTimeout(() => {
+    renderFeedback(false, state.firstWrongAnswer ?? secondWrongAnswer ?? q.effect);
+    showScreen("feedbackScreen");
+  }, 350);
 }
 
 function renderFeedback(isCorrect, userAnswer) {
   const q = state.currentQuestion;
+  if (!q) return;
+
   const attack = types[q.attack];
   const defenseNames = q.defenses.map((id) => types[id].name).join(" + ");
 
-  $("feedbackTitle").textContent = isCorrect ? "答對了！" : "差一點！";
-  $("feedbackIcon").textContent = isCorrect ? "🎉" : "💪";
+  if ($("feedbackTitle")) {
+    $("feedbackTitle").textContent = isCorrect ? "答對了！" : "再記一次！";
+  }
 
-  $("feedbackMain").textContent = `${attack.name} 攻擊 ${defenseNames} 是「${effectLabels[q.effect]}」，倍率是 ${q.effect}x。`;
+  if ($("feedbackIcon")) {
+    $("feedbackIcon").textContent = isCorrect ? "🎉" : "😣";
+  }
+
+  if ($("feedbackMain")) {
+    $("feedbackMain").textContent = `${attack.name} 攻擊 ${defenseNames} 是「${effectLabels[q.effect]}」，倍率是 ${q.effect}x。`;
+  }
 
   let explainHtml = "";
 
   if (q.defenses.length === 1) {
     explainHtml = `
       <strong>解析：</strong><br>
-      ${attack.name} 對 ${defenseNames} 的效果是 ${q.effect}x。<br>
-      你的答案：${effectLabels[userAnswer]} ${userAnswer}x
+      <div class="explain-line">
+        ${attack.name} 攻擊 ${defenseNames} 的效果是 <strong>${q.effect}x</strong>。
+      </div>
+      <div class="explain-line">
+        你的答案：${effectLabels[userAnswer]} ${userAnswer}x
+      </div>
+      <div class="formula-box">
+        ${getSimpleReason(q.attack, q.defenses[0], q.effect)}
+      </div>
     `;
   } else {
+    const part1 = q.parts[0];
+    const part2 = q.parts[1];
+
     explainHtml = `
       <strong>雙屬性解析：</strong><br>
-      ${q.parts
-        .map((part) => {
-          return `${attack.name} 攻擊 ${types[part.defense].name} = ${part.effect}x`;
-        })
-        .join("<br>")}
-      <br><br>
-      所以總效果是：
-      ${q.parts.map((p) => p.effect).join(" × ")} = <strong>${q.effect}x</strong><br>
-      你的答案：${effectLabels[userAnswer]} ${userAnswer}x
+      <div class="explain-line">
+        ${attack.name} 攻擊 ${types[part1.defense].name} = <strong>${part1.effect}x</strong>
+      </div>
+      <div class="explain-line">
+        ${attack.name} 攻擊 ${types[part2.defense].name} = <strong>${part2.effect}x</strong>
+      </div>
+
+      <div class="formula-box">
+        雙屬性計算方式：${part1.effect} × ${part2.effect} = <strong>${q.effect}x</strong>
+      </div>
+
+      <div class="explain-line">
+        你的答案：${effectLabels[userAnswer]} ${userAnswer}x
+      </div>
     `;
   }
 
-  $("feedbackExplain").innerHTML = explainHtml;
+  if ($("feedbackExplain")) {
+    $("feedbackExplain").innerHTML = explainHtml;
+  }
 
   const speechText = isCorrect
-    ? `答對了！${attack.name}攻擊${defenseNames}是${effectLabels[q.effect]}，倍率是${speakMultiplier(q.effect)}。`
-    : `差一點！正確答案是${effectLabels[q.effect]}，倍率是${speakMultiplier(q.effect)}。`;
+    ? `答對了！${attack.name}攻擊${defenseNames}是${effectLabels[q.effect]}，倍率是${effectVoice[q.effect]}。`
+    : `正確答案是${effectLabels[q.effect]}，倍率是${effectVoice[q.effect]}。`;
 
   speak(speechText);
+}
+
+function getSimpleReason(attackId, defenseId, effect) {
+  const attackName = types[attackId].name;
+  const defenseName = types[defenseId].name;
+
+  if (effect === 2) {
+    return `${attackName} 對 ${defenseName} 很有效，所以是 2x。`;
+  }
+
+  if (effect === 0.5) {
+    return `${defenseName} 會抵抗 ${attackName} 的攻擊，所以是 0.5x。`;
+  }
+
+  if (effect === 0) {
+    return `${defenseName} 可以讓 ${attackName} 的攻擊無效，所以是 0x。`;
+  }
+
+  return `${attackName} 對 ${defenseName} 沒有特別優勢或劣勢，所以是 1x。`;
 }
 
 function nextQuestion() {
@@ -336,9 +1008,11 @@ function nextQuestion() {
 }
 
 function renderResult() {
-  $("correctText").textContent = `${state.correct} / ${TOTAL_QUESTIONS}`;
-  $("bestComboText").textContent = state.bestCombo;
-  $("finalScoreText").textContent = state.score;
+  if ($("correctText")) $("correctText").textContent = `${state.correct} / ${TOTAL_QUESTIONS}`;
+  if ($("bestComboText")) $("bestComboText").textContent = state.bestCombo;
+  if ($("finalScoreText")) $("finalScoreText").textContent = state.score;
+
+  if (!$("wrongList")) return;
 
   if (state.wrongAnswers.length === 0) {
     $("wrongList").innerHTML = `<div class="no-wrong">太棒了！這次沒有錯題 🎉</div>`;
@@ -354,7 +1028,12 @@ function renderResult() {
       return `
         <div class="wrong-item">
           <strong>${attack} → ${defenses}</strong><br>
-          你的答案：${effectLabels[item.userAnswer]} ${item.userAnswer}x<br>
+          第一次答案：${effectLabels[item.userAnswer]} ${item.userAnswer}x<br>
+          ${
+            item.secondWrongAnswer !== null && item.secondWrongAnswer !== undefined
+              ? `第二次答案：${effectLabels[item.secondWrongAnswer]} ${item.secondWrongAnswer}x<br>`
+              : ""
+          }
           正確答案：${effectLabels[item.correctAnswer]} ${item.correctAnswer}x
         </div>
       `;
@@ -362,8 +1041,74 @@ function renderResult() {
     .join("");
 }
 
+function renderTrainerTrack(mood = "normal") {
+  const track = $("trainerTrack");
+  const trainerIcon = $("trainerIcon");
+  const trainerMood = $("trainerMood");
+  const hint = $("trainerHint");
+
+  if (!track || !trainerIcon || !trainerMood) return;
+
+  track.innerHTML = Array.from({ length: TOTAL_QUESTIONS }, (_, i) => {
+    const done = i < state.correct;
+    return `<div class="track-step ${done ? "done" : ""}"></div>`;
+  }).join("");
+
+  const percent = Math.min((state.correct / TOTAL_QUESTIONS) * 92, 92);
+
+  trainerIcon.style.left = `calc(${percent}% + 12px)`;
+  trainerMood.style.left = `calc(${percent}% + 20px)`;
+
+  trainerIcon.classList.remove("happy-jump", "sad-shake");
+
+  if (mood === "happy") {
+    trainerIcon.textContent = "🧑‍🎒";
+    trainerMood.textContent = "😄";
+    trainerIcon.classList.add("happy-jump");
+    if (hint) hint.textContent = "答對了！訓練家往前走一步！";
+  } else if (mood === "sad") {
+    trainerIcon.textContent = "🧑‍🎒";
+    trainerMood.textContent = "😣";
+    trainerIcon.classList.add("sad-shake");
+    if (hint) hint.textContent = "差一點！再試一次或查看答案。";
+  } else {
+    trainerIcon.textContent = "🧑‍🎒";
+    trainerMood.textContent = "🙂";
+    if (hint) hint.textContent = "答對就往前走！";
+  }
+}
+
+function showRetryPanel(text) {
+  if ($("retryText")) $("retryText").textContent = text;
+  $("retryPanel")?.classList.remove("hidden");
+}
+
+function hideRetryPanel() {
+  $("retryPanel")?.classList.add("hidden");
+}
+
+function setQuestionRetrying(isRetrying) {
+  document.querySelector(".question-card")?.classList.toggle("retrying", isRetrying);
+}
+
+function disableAnswerButtons() {
+  document.querySelectorAll(".answer-btn").forEach((btn) => {
+    btn.classList.add("disabled");
+  });
+}
+
+function enableAnswerButtons() {
+  document.querySelectorAll(".answer-btn").forEach((btn) => {
+    btn.classList.remove("disabled", "wrong-flash");
+  });
+}
+
+/**
+ * 相剋表
+ */
 function renderChartButtons() {
   const container = $("chartTypeButtons");
+  if (!container) return;
 
   container.innerHTML = typeIds
     .map((id) => {
@@ -386,15 +1131,17 @@ function renderChartButtons() {
 }
 
 function openChart(typeId = "fire") {
-  $("chartModal").classList.add("active");
+  $("chartModal")?.classList.add("active");
   renderChartDetail(typeId);
 }
 
 function closeChart() {
-  $("chartModal").classList.remove("active");
+  $("chartModal")?.classList.remove("active");
 }
 
 function renderChartDetail(attackId) {
+  if (!$("chartDetail")) return;
+
   document.querySelectorAll(".chart-type-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.type === attackId);
   });
@@ -410,11 +1157,11 @@ function renderChartDetail(attackId) {
 
   typeIds.forEach((defenseId) => {
     const effect = getEffectiveness(attackId, defenseId);
-    if (groups[effect]) {
-      groups[effect].push(defenseId);
-    } else {
-      groups[1].push(defenseId);
-    }
+
+    if (effect === 2) groups[2].push(defenseId);
+    else if (effect === 0.5) groups[0.5].push(defenseId);
+    else if (effect === 0) groups[0].push(defenseId);
+    else groups[1].push(defenseId);
   });
 
   $("chartDetail").innerHTML = `
@@ -450,17 +1197,25 @@ function renderChartRow(title, ids) {
   `;
 }
 
+/**
+ * 語音
+ */
 function speakQuestion(question) {
   const attack = types[question.attack].name;
   const defenses = question.defenses.map((id) => types[id].name).join("加");
-  speak(`${attack}屬性攻擊${defenses}屬性，效果如何？`);
+
+  if (question.defenses.length === 2) {
+    speak(`${attack}屬性攻擊${defenses}雙屬性，效果如何？`);
+  } else {
+    speak(`${attack}屬性攻擊${defenses}屬性，效果如何？`);
+  }
 }
 
 function speak(text) {
   if (!state.voiceEnabled) return;
   if (!("speechSynthesis" in window)) return;
 
-  window.speechSynthesis.cancel();
+  cancelSpeech();
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "zh-TW";
@@ -471,19 +1226,15 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
-function speakMultiplier(value) {
-  const map = {
-    4: "四倍",
-    2: "兩倍",
-    1: "一倍",
-    0.5: "零點五倍",
-    0.25: "零點二五倍",
-    0: "零倍"
-  };
-
-  return map[value] || `${value}倍`;
+function cancelSpeech() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
 }
 
+/**
+ * 小工具
+ */
 function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
