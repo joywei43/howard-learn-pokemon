@@ -64,6 +64,15 @@
     <!-- Game Screen -->
     <section id="gameScreen" class="screen">
       <div class="game-topbar">
+        <div class="trainer-section">
+  <div class="trainer-track-wrap">
+    <div id="trainerTrack" class="trainer-track"></div>
+    <div id="trainerIcon" class="trainer-icon">🧑‍🎒</div>
+    <div id="trainerMood" class="trainer-mood">🙂</div>
+    <div class="finish-flag">🏁</div>
+  </div>
+  <div id="trainerHint" class="trainer-hint">答對就往前走！</div>
+</div>
         <button id="backHomeBtn" class="circle-btn">←</button>
         <div class="progress-text">
           第 <span id="currentQuestion">1</span> / <span id="totalQuestions">10</span> 題
@@ -92,6 +101,13 @@
         <h2 id="questionText">效果如何？</h2>
 
         <div id="answerOptions" class="answer-grid"></div>
+        <div id="retryPanel" class="retry-panel hidden">
+  <p id="retryText">差一點，再試一次！</p>
+  <div class="retry-actions">
+    <button id="retryBtn" class="secondary-btn">再試一次</button>
+    <button id="showAnswerBtn" class="primary-btn">看答案</button>
+  </div>
+</div>
       </div>
     </section>
 
