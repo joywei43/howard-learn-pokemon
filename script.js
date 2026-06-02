@@ -28,7 +28,7 @@ const types = {
 const typeIds = Object.keys(types);
 
 /**
- * 官方邏輯：
+ * 官方屬性邏輯：
  * 攻擊方 → 防守方
  * 2 = 效果很好
  * 0.5 = 效果不好
@@ -212,8 +212,8 @@ const chart = {
 };
 
 /**
- * 大師試煉使用比較像實際遊戲中會出現的雙屬性組合。
- * 不隨機亂湊，讓練習更貼近真實雙屬性邏輯。
+ * 大師試煉：雙屬性池
+ * 用比較常見 / 合理的雙屬性組合，避免亂湊。
  */
 const dualTypePool = [
   ["normal", "flying"],
@@ -339,6 +339,7 @@ const effectVoice = {
 
 let state = {
   level: "beginner",
+  lastLevel: "beginner",
   questionIndex: 0,
   score: 0,
   combo: 0,
@@ -347,156 +348,123 @@ let state = {
   currentQuestion: null,
   wrongAnswers: [],
   voiceEnabled: true,
-  voiceRate: 0.9,
-
+  voiceRate: 0.95,
   attemptsOnCurrentQuestion: 0,
-  firstWrongAnswer: null,
-  lastLevel: "beginner"
+  firstWrongAnswer: null
 };
 
 const $ = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", () => {
-  ensureV2Elements();
-  injectV2Styles();
+  injectV3Styles();
+  removeTrainerElements();
   renderTopRibbon();
   bindEvents();
   renderChartButtons();
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
+  }
 });
 
 /**
- * 如果你還沒改 HTML，這段會自動補上：
- * 1. 訓練家前進路線
- * 2. 再試一次區塊
+ * V3 動態樣式
+ * 不需要改 style.css，這裡會自動注入動畫。
  */
-function ensureV2Elements() {
-  const gameScreen = $("gameScreen");
-  const gameTopbar = document.querySelector(".game-topbar");
-  const questionCard = document.querySelector(".question-card");
-  const answerOptions = $("answerOptions");
-
-  if (gameScreen && gameTopbar && !$("trainerTrack")) {
-    const trainerSection = document.createElement("div");
-    trainerSection.className = "trainer-section";
-    trainerSection.innerHTML = `
-      <div class="trainer-track-wrap">
-        <div id="trainerTrack" class="trainer-track"></div>
-        <div id="trainerIcon" class="trainer-icon">🧑‍🎒</div>
-        <div id="trainerMood" class="trainer-mood">🙂</div>
-        <div class="finish-flag">🏁</div>
-      </div>
-      <div id="trainerHint" class="trainer-hint">答對就往前走！</div>
-    `;
-
-    gameTopbar.insertAdjacentElement("afterend", trainerSection);
-  }
-
-  if (questionCard && answerOptions && !$("retryPanel")) {
-    const retryPanel = document.createElement("div");
-    retryPanel.id = "retryPanel";
-    retryPanel.className = "retry-panel hidden";
-    retryPanel.innerHTML = `
-      <p id="retryText">差一點，再試一次！</p>
-      <div class="retry-actions">
-        <button id="retryBtn" class="secondary-btn">再試一次</button>
-        <button id="showAnswerBtn" class="primary-btn">看答案</button>
-      </div>
-    `;
-
-    answerOptions.insertAdjacentElement("afterend", retryPanel);
-  }
-}
-
-/**
- * 如果你還沒把 V2 CSS 貼進 style.css，
- * 這段會先讓新功能有基本樣式。
- */
-function injectV2Styles() {
-  if ($("v2DynamicStyle")) return;
+function injectV3Styles() {
+  if ($("v3DynamicStyle")) return;
 
   const style = document.createElement("style");
-  style.id = "v2DynamicStyle";
+  style.id = "v3DynamicStyle";
   style.textContent = `
-    .trainer-section {
-      margin-bottom: 18px;
+    .correct-burst::after {
+      content: "✨ 🎉 ⭐ ✨ 🎉 ⭐";
+      position: fixed;
+      left: 50%;
+      top: 18%;
+      transform: translateX(-50%);
+      font-size: 2.1rem;
+      z-index: 9999;
+      animation: burstPop 0.85s ease forwards;
+      pointer-events: none;
+      white-space: nowrap;
     }
 
-    .trainer-track-wrap {
-      position: relative;
-      height: 92px;
-      border-radius: 24px;
-      background: linear-gradient(90deg, #e0f2fe, #f0fdf4);
-      border: 2px solid #c7d2fe;
-      overflow: hidden;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    @keyframes burstPop {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.6) translateY(20px);
+      }
+      40% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.18) translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1) translateY(-34px);
+      }
     }
 
-    .trainer-track {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      align-items: center;
-      padding: 0 24px;
-      gap: 8px;
+    .wrong-shake {
+      animation: wrongShake 0.45s ease;
     }
 
-    .track-step {
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.28);
-    }
-
-    .track-step.done {
-      background: linear-gradient(90deg, #22c55e, #84cc16);
-    }
-
-    .trainer-icon {
-      position: absolute;
-      bottom: 14px;
-      left: 14px;
-      font-size: 2.15rem;
-      transition: left 0.35s ease, transform 0.2s ease;
-      z-index: 2;
-    }
-
-    .trainer-icon.happy-jump {
-      transform: translateY(-8px) scale(1.1);
-    }
-
-    .trainer-icon.sad-shake {
-      animation: sadShake 0.35s ease;
-    }
-
-    @keyframes sadShake {
+    @keyframes wrongShake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
     }
 
-    .trainer-mood {
-      position: absolute;
-      top: 8px;
-      left: 20px;
-      font-size: 1.45rem;
-      transition: left 0.35s ease;
-      z-index: 2;
+    .question-pop {
+      animation: questionPop 0.45s ease;
     }
 
-    .finish-flag {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.9rem;
-      z-index: 2;
+    @keyframes questionPop {
+      0% {
+        opacity: 0.45;
+        transform: translateY(14px) scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
-    .trainer-hint {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: 900;
-      color: #475569;
+    .type-pulse {
+      animation: typePulse 0.55s ease;
+    }
+
+    @keyframes typePulse {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+
+    .answer-btn.disabled {
+      opacity: 0.42;
+      pointer-events: none;
+      filter: grayscale(0.25);
+    }
+
+    .answer-btn.correct-glow {
+      outline: 5px solid rgba(34, 197, 94, 0.35);
+      box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.12), 0 12px 22px rgba(34, 197, 94, 0.25);
+    }
+
+    .answer-btn.wrong-flash {
+      animation: wrongFlash 0.35s ease;
+      filter: grayscale(0.35);
+      opacity: 0.5;
+    }
+
+    @keyframes wrongFlash {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
     }
 
     .retry-panel {
@@ -512,6 +480,7 @@ function injectV2Styles() {
       margin: 0;
       font-weight: 900;
       color: #9a3412;
+      line-height: 1.6;
     }
 
     .retry-actions {
@@ -524,22 +493,6 @@ function injectV2Styles() {
 
     .hidden {
       display: none !important;
-    }
-
-    .answer-btn.disabled {
-      opacity: 0.45;
-      pointer-events: none;
-      filter: grayscale(0.25);
-    }
-
-    .answer-btn.wrong-flash {
-      animation: wrongFlash 0.32s ease;
-    }
-
-    @keyframes wrongFlash {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
     }
 
     .question-card.retrying {
@@ -564,6 +517,40 @@ function injectV2Styles() {
   document.head.appendChild(style);
 }
 
+/**
+ * 刪除舊版訓練家路線元素
+ */
+function removeTrainerElements() {
+  document.querySelectorAll(
+    ".trainer-section, .trainer-track-wrap, #trainerTrack, #trainerIcon, #trainerMood, #trainerHint"
+  ).forEach((el) => el.remove());
+
+  ensureRetryPanel();
+}
+
+/**
+ * 保留「再試一次」區塊
+ */
+function ensureRetryPanel() {
+  const questionCard = document.querySelector(".question-card");
+  const answerOptions = $("answerOptions");
+
+  if (questionCard && answerOptions && !$("retryPanel")) {
+    const retryPanel = document.createElement("div");
+    retryPanel.id = "retryPanel";
+    retryPanel.className = "retry-panel hidden";
+    retryPanel.innerHTML = `
+      <p id="retryText">差一點，再試一次！</p>
+      <div class="retry-actions">
+        <button id="retryBtn" class="secondary-btn">再試一次</button>
+        <button id="showAnswerBtn" class="primary-btn">看答案</button>
+      </div>
+    `;
+
+    answerOptions.insertAdjacentElement("afterend", retryPanel);
+  }
+}
+
 function bindEvents() {
   document.querySelectorAll(".level-card").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -586,8 +573,8 @@ function bindEvents() {
     state.voiceEnabled = !state.voiceEnabled;
     $("voiceToggle").textContent = state.voiceEnabled ? "🔊 語音：開" : "🔇 語音：關";
 
-    if (!state.voiceEnabled && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+    if (!state.voiceEnabled) {
+      cancelSpeech();
     }
   });
 
@@ -599,7 +586,6 @@ function bindEvents() {
     hideRetryPanel();
     setQuestionRetrying(false);
     enableAnswerButtons();
-    renderTrainerTrack("normal");
     speak("再試一次看看。");
   });
 
@@ -647,7 +633,6 @@ function startGame(level) {
 
   hideRetryPanel();
   setQuestionRetrying(false);
-  renderTrainerTrack("normal");
 
   showScreen("gameScreen");
   generateQuestion();
@@ -668,7 +653,6 @@ function generateQuestion() {
   hideRetryPanel();
   setQuestionRetrying(false);
   enableAnswerButtons();
-  renderTrainerTrack("normal");
 
   if ($("currentQuestion")) $("currentQuestion").textContent = state.questionIndex;
   if ($("scoreText")) $("scoreText").textContent = state.score;
@@ -684,6 +668,7 @@ function generateQuestion() {
 
   state.currentQuestion = question;
   renderQuestion(question);
+  playQuestionAnimation();
   speakQuestion(question);
 }
 
@@ -702,12 +687,7 @@ function generateSingleTypeQuestion(level) {
     attack,
     defenses: [defense],
     effect,
-    parts: [
-      {
-        defense,
-        effect
-      }
-    ]
+    parts: [{ defense, effect }]
   };
 }
 
@@ -717,11 +697,12 @@ function generateMasterQuestion() {
 
   const e1 = getEffectiveness(attack, def1);
   const e2 = getEffectiveness(attack, def2);
+  const finalEffect = normalizeEffect(e1 * e2);
 
   return {
     attack,
     defenses: [def1, def2],
-    effect: normalizeEffect(e1 * e2),
+    effect: finalEffect,
     parts: [
       { defense: def1, effect: e1 },
       { defense: def2, effect: e2 }
@@ -803,10 +784,10 @@ function getOptionsByLevel() {
 }
 
 /**
- * 答題邏輯 V2：
- * 第一次答錯：不直接跳結果，讓小孩再試一次。
- * 第二次答錯或按看答案：才進入解析。
- * 答對：訓練家往前走。
+ * 答題邏輯：
+ * 第一次答錯 → 留在原題再試一次
+ * 第二次答錯 / 看答案 → 顯示解析
+ * 答對 → 星星動畫 + 解析
  */
 function checkAnswer(userAnswer, clickedButton = null) {
   const q = state.currentQuestion;
@@ -843,19 +824,21 @@ function checkAnswer(userAnswer, clickedButton = null) {
     hideRetryPanel();
     setQuestionRetrying(false);
     disableAnswerButtons();
-    renderTrainerTrack("happy");
+    clickedButton?.classList.add("correct-glow");
+
+    playCorrectAnimation();
+    speak("答對了！太棒了！");
 
     setTimeout(() => {
       renderFeedback(true, userAnswer);
       showScreen("feedbackScreen");
-    }, 450);
+    }, 850);
 
     return;
   }
 
   /**
-   * 第一次答錯：
-   * 訓練家懊惱，出現再試一次。
+   * 第一次答錯：不跳解析，讓小孩再試一次。
    */
   if (state.attemptsOnCurrentQuestion === 0) {
     state.attemptsOnCurrentQuestion = 1;
@@ -870,17 +853,21 @@ function checkAnswer(userAnswer, clickedButton = null) {
     const attackName = types[q.attack].name;
     const defenseNames = q.defenses.map((id) => types[id].name).join(" + ");
 
-    renderTrainerTrack("sad");
+    playWrongAnimation();
     setQuestionRetrying(true);
-    showRetryPanel(`差一點！${attackName} 攻擊 ${defenseNames} 不是「${effectLabels[userAnswer]}」，再試一次看看。`);
-    speak("差一點，再試一次看看。");
+
+    showRetryPanel(
+      `差一點！${attackName} 攻擊 ${defenseNames} 不是「${effectLabels[userAnswer]}」，再試一次看看。`
+    );
+
+    speak("差一點，再試一次！");
     return;
   }
 
   /**
-   * 第二次還錯：
-   * 直接公布答案。
+   * 第二次還錯：公布答案。
    */
+  playWrongAnimation();
   revealAnswerAfterWrong(userAnswer);
 }
 
@@ -901,12 +888,11 @@ function revealAnswerAfterWrong(secondWrongAnswer = null) {
   hideRetryPanel();
   setQuestionRetrying(false);
   disableAnswerButtons();
-  renderTrainerTrack("sad");
 
   setTimeout(() => {
     renderFeedback(false, state.firstWrongAnswer ?? secondWrongAnswer ?? q.effect);
     showScreen("feedbackScreen");
-  }, 350);
+  }, 450);
 }
 
 function renderFeedback(isCorrect, userAnswer) {
@@ -1041,50 +1027,63 @@ function renderResult() {
     .join("");
 }
 
-function renderTrainerTrack(mood = "normal") {
-  const track = $("trainerTrack");
-  const trainerIcon = $("trainerIcon");
-  const trainerMood = $("trainerMood");
-  const hint = $("trainerHint");
+/**
+ * 動畫
+ */
+function playQuestionAnimation() {
+  const card = document.querySelector(".question-card");
+  const attackBadge = $("attackBadge");
+  const defenseBadges = document.querySelectorAll(".defense-badge");
 
-  if (!track || !trainerIcon || !trainerMood) return;
-
-  track.innerHTML = Array.from({ length: TOTAL_QUESTIONS }, (_, i) => {
-    const done = i < state.correct;
-    return `<div class="track-step ${done ? "done" : ""}"></div>`;
-  }).join("");
-
-  const percent = Math.min((state.correct / TOTAL_QUESTIONS) * 92, 92);
-
-  trainerIcon.style.left = `calc(${percent}% + 12px)`;
-  trainerMood.style.left = `calc(${percent}% + 20px)`;
-
-  trainerIcon.classList.remove("happy-jump", "sad-shake");
-
-  if (mood === "happy") {
-    trainerIcon.textContent = "🧑‍🎒";
-    trainerMood.textContent = "😄";
-    trainerIcon.classList.add("happy-jump");
-    if (hint) hint.textContent = "答對了！訓練家往前走一步！";
-  } else if (mood === "sad") {
-    trainerIcon.textContent = "🧑‍🎒";
-    trainerMood.textContent = "😣";
-    trainerIcon.classList.add("sad-shake");
-    if (hint) hint.textContent = "差一點！再試一次或查看答案。";
-  } else {
-    trainerIcon.textContent = "🧑‍🎒";
-    trainerMood.textContent = "🙂";
-    if (hint) hint.textContent = "答對就往前走！";
+  if (card) {
+    card.classList.remove("question-pop");
+    void card.offsetWidth;
+    card.classList.add("question-pop");
   }
+
+  if (attackBadge) {
+    attackBadge.classList.remove("type-pulse");
+    void attackBadge.offsetWidth;
+    attackBadge.classList.add("type-pulse");
+  }
+
+  defenseBadges.forEach((badge) => {
+    badge.classList.remove("type-pulse");
+    void badge.offsetWidth;
+    badge.classList.add("type-pulse");
+  });
+}
+
+function playCorrectAnimation() {
+  document.body.classList.remove("correct-burst");
+  void document.body.offsetWidth;
+  document.body.classList.add("correct-burst");
+
+  setTimeout(() => {
+    document.body.classList.remove("correct-burst");
+  }, 900);
+}
+
+function playWrongAnimation() {
+  const card = document.querySelector(".question-card");
+  if (!card) return;
+
+  card.classList.remove("wrong-shake");
+  void card.offsetWidth;
+  card.classList.add("wrong-shake");
+
+  setTimeout(() => {
+    card.classList.remove("wrong-shake");
+  }, 520);
+}
+
+function hideRetryPanel() {
+  $("retryPanel")?.classList.add("hidden");
 }
 
 function showRetryPanel(text) {
   if ($("retryText")) $("retryText").textContent = text;
   $("retryPanel")?.classList.remove("hidden");
-}
-
-function hideRetryPanel() {
-  $("retryPanel")?.classList.add("hidden");
 }
 
 function setQuestionRetrying(isRetrying) {
@@ -1099,7 +1098,7 @@ function disableAnswerButtons() {
 
 function enableAnswerButtons() {
   document.querySelectorAll(".answer-btn").forEach((btn) => {
-    btn.classList.remove("disabled", "wrong-flash");
+    btn.classList.remove("disabled", "wrong-flash", "correct-glow");
   });
 }
 
@@ -1199,6 +1198,8 @@ function renderChartRow(title, ids) {
 
 /**
  * 語音
+ * 使用瀏覽器內建語音，透過 pitch 模擬比較像小朋友的聲音。
+ * 注意：不同裝置可用聲音會不同，無法保證完全是兒童聲。
  */
 function speakQuestion(question) {
   const attack = types[question.attack].name;
@@ -1219,9 +1220,23 @@ function speak(text) {
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "zh-TW";
-  utterance.rate = state.voiceRate;
-  utterance.pitch = 1.05;
+
+  // 模擬小朋友語氣：較高音、稍微活潑
+  utterance.rate = state.voiceRate || 0.95;
+  utterance.pitch = 1.45;
   utterance.volume = 1;
+
+  const voices = window.speechSynthesis.getVoices();
+
+  const zhVoice =
+    voices.find((v) => v.lang === "zh-TW") ||
+    voices.find((v) => v.lang === "zh-HK") ||
+    voices.find((v) => v.lang === "zh-CN") ||
+    voices.find((v) => v.lang && v.lang.startsWith("zh"));
+
+  if (zhVoice) {
+    utterance.voice = zhVoice;
+  }
 
   window.speechSynthesis.speak(utterance);
 }
